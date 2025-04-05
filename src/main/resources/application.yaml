@@ -1,5 +1,5 @@
 spring:
   application:
-    name: BRT-service
+    name: CRM-service
   config:
     import: configserver:http://localhost:8888
