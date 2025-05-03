@@ -1,6 +1,7 @@
 package org.example.crmservice.clients;
 
 import org.example.crmservice.dtos.SubscriberDTO;
+import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.FullSubscriberAndTariffInfoDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -29,7 +30,7 @@ public class BRTServiceClient {
                 .body(String.class);
     }
 
-    public String getSubscriberAndTariffInfo(Long subscriberId) {
+    public FullSubscriberAndTariffInfoDTO getSubscriberAndTariffInfo(Long subscriberId) {
         return restClientBuilder
                 .build()
                 .get()
@@ -37,7 +38,7 @@ public class BRTServiceClient {
                         .path("/subscribers/{subscriberId}")
                         .build(subscriberId))
                 .retrieve()
-                .body(String.class);
+                .body(FullSubscriberAndTariffInfoDTO.class);
     }
 
     public String createSubscriber(SubscriberDTO subscriberDTO) {

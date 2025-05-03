@@ -2,6 +2,7 @@ package org.example.crmservice.controllers;
 
 import org.example.crmservice.dtos.SubscriberDTO;
 import org.example.crmservice.dtos.TopUpDTO;
+import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.FullSubscriberAndTariffInfoDTO;
 import org.example.crmservice.services.SubscribersService;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +31,7 @@ public class SubscribersController {
     }
 
     @GetMapping("subscribers/{subscriberId}")
-    public String getSubscriberInfo(@PathVariable Long subscriberId){
+    public FullSubscriberAndTariffInfoDTO getSubscriberAndTariffInfo(@PathVariable Long subscriberId){
         return subscribersService.getSubscriberInfo(subscriberId);
     }
 }
