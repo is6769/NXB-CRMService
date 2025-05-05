@@ -7,11 +7,12 @@ import org.example.crmservice.services.SubscribersService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class SubscribersController {
+@RequestMapping("/manager")
+public class ManagerController {
 
     private final SubscribersService subscribersService;
 
-    public SubscribersController(SubscribersService subscribersService) {
+    public ManagerController(SubscribersService subscribersService) {
         this.subscribersService = subscribersService;
     }
 
