@@ -4,6 +4,7 @@ import org.example.crmservice.dtos.SubscriberDTO;
 import org.example.crmservice.dtos.TopUpDTO;
 import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.FullSubscriberAndTariffInfoDTO;
 import org.example.crmservice.services.SubscribersService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -17,9 +18,9 @@ public class SubscriberController {
         this.subscribersService = subscribersService;
     }
 
-//    @PatchMapping("subscriber/balance")
-//    public String topUpBalance(@RequestParam TopUpDTO topUpDTO){
-//        return subscribersService.topUpBalance(topUpDTO);
-//    }
+    @PatchMapping("subscriber/balance")
+    public String topUpBalance(@RequestParam TopUpDTO topUpDTO, @AuthenticationPrincipal String ref_id){
+        return subscribersService.topUpBalance(Long.valueOf(ref_id),topUpDTO);
+    }
 
 }
