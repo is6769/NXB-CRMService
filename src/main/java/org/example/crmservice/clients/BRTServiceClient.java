@@ -1,6 +1,7 @@
 package org.example.crmservice.clients;
 
 import org.example.crmservice.dtos.SubscriberDTO;
+import org.example.crmservice.dtos.TopUpDTO;
 import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.FullSubscriberAndTariffInfoDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -49,6 +50,18 @@ public class BRTServiceClient {
                         .path("/subscriber")
                         .build())
                 .body(subscriberDTO)
+                .retrieve()
+                .body(String.class);
+    }
+
+    public String topUpBalance(Long subscriberId, TopUpDTO topUpDTO) {
+        return restClientBuilder
+                .build()
+                .patch()
+                .uri(BASE_URL, uriBuilder -> uriBuilder
+                        .path("/subscribers/{subscriberId}/balance")
+                        .build(subscriberId))
+                .body(topUpDTO)
                 .retrieve()
                 .body(String.class);
     }

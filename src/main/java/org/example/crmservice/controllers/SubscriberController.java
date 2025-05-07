@@ -19,7 +19,7 @@ public class SubscriberController {
     }
 
     @PatchMapping("subscriber/balance")
-    public String topUpBalance(@RequestParam TopUpDTO topUpDTO, @AuthenticationPrincipal String ref_id){
+    public String topUpBalance(@RequestBody TopUpDTO topUpDTO, @AuthenticationPrincipal String ref_id){
         return subscribersService.topUpBalance(Long.valueOf(ref_id),topUpDTO);
     }
 

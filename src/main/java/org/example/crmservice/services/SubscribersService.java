@@ -28,6 +28,6 @@ public class SubscribersService {
     }
 
     public String topUpBalance(Long subscriberId, TopUpDTO topUpDTO) {
-        return null;
+        return brtServiceClient.topUpBalance(subscriberId,topUpDTO);
     }
 }

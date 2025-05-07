@@ -27,7 +27,7 @@ public class ManagerController {
     }
 
     @PatchMapping("subscribers/{subscriberId}/balance")
-    public String topUpBalance(@PathVariable Long subscriberId, @RequestParam TopUpDTO topUpDTO){
+    public String topUpBalance(@PathVariable Long subscriberId, @RequestBody TopUpDTO topUpDTO){
         return subscribersService.topUpBalance(subscriberId,topUpDTO);
     }
 
