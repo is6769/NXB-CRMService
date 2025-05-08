@@ -4,6 +4,7 @@ import org.example.crmservice.clients.BRTServiceClient;
 import org.example.crmservice.dtos.SubscriberDTO;
 import org.example.crmservice.dtos.TopUpDTO;
 import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.FullSubscriberAndTariffInfoDTO;
+import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.SubscriberWithIdDTO;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,7 +24,7 @@ public class SubscribersService {
         return brtServiceClient.getSubscriberAndTariffInfo(subscriberId);
     }
 
-    public String createSubscriber(SubscriberDTO subscriberDTO) {
+    public SubscriberWithIdDTO createSubscriber(SubscriberDTO subscriberDTO) {
         return brtServiceClient.createSubscriber(subscriberDTO);
     }
 

@@ -3,6 +3,7 @@ package org.example.crmservice.controllers;
 import org.example.crmservice.dtos.SubscriberDTO;
 import org.example.crmservice.dtos.TopUpDTO;
 import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.FullSubscriberAndTariffInfoDTO;
+import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.SubscriberWithIdDTO;
 import org.example.crmservice.services.SubscribersService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class ManagerController {
     }
 
     @PostMapping("/subscriber")
-    public String createSubscriber(@RequestBody SubscriberDTO subscriberDTO){
+    public SubscriberWithIdDTO createSubscriber(@RequestBody SubscriberDTO subscriberDTO){
         return subscribersService.createSubscriber(subscriberDTO);
     }
 

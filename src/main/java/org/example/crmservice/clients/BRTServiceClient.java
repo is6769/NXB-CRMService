@@ -3,6 +3,7 @@ package org.example.crmservice.clients;
 import org.example.crmservice.dtos.SubscriberDTO;
 import org.example.crmservice.dtos.TopUpDTO;
 import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.FullSubscriberAndTariffInfoDTO;
+import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.SubscriberWithIdDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -42,7 +43,7 @@ public class BRTServiceClient {
                 .body(FullSubscriberAndTariffInfoDTO.class);
     }
 
-    public String createSubscriber(SubscriberDTO subscriberDTO) {
+    public SubscriberWithIdDTO createSubscriber(SubscriberDTO subscriberDTO) {
         return restClientBuilder
                 .build()
                 .post()
@@ -51,7 +52,7 @@ public class BRTServiceClient {
                         .build())
                 .body(subscriberDTO)
                 .retrieve()
-                .body(String.class);
+                .body(SubscriberWithIdDTO.class);
     }
 
     public String topUpBalance(Long subscriberId, TopUpDTO topUpDTO) {
