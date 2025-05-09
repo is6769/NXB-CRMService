@@ -6,6 +6,8 @@ import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.FullSubscriberAnd
 import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.SubscriberWithIdDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 
 @Component
@@ -22,14 +24,18 @@ public class BRTServiceClient {
 
 
     public String setTariffForSubscriber(Long subscriberId, Long tariffId){
-        return restClientBuilder
-                .build()
-                .put()
-                .uri(BASE_URL,uriBuilder -> uriBuilder
-                        .path("/subscribers/{subscriberId}/tariff/{tariffId}")
-                        .build(subscriberId,tariffId))
-                .retrieve()
-                .body(String.class);
+        try {
+            return restClientBuilder
+                    .build()
+                    .put()
+                    .uri(BASE_URL, uriBuilder -> uriBuilder
+                            .path("/subscribers/{subscriberId}/tariff/{tariffId}")
+                            .build(subscriberId, tariffId))
+                    .retrieve()
+                    .body(String.class);
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            throw e;
+        }
     }
 
     public FullSubscriberAndTariffInfoDTO getSubscriberAndTariffInfo(Long subscriberId) {
