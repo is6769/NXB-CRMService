@@ -3,6 +3,7 @@ package org.example.crmservice.exceptions.handlers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -15,13 +16,26 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class RestExceptionsHandler {
-    private static final Logger log = LoggerFactory.getLogger(RestExceptionsHandler.class);
 
     @ExceptionHandler(exception = {HttpClientErrorException.class, HttpServerErrorException.class})
     public ResponseEntity<byte[]> handleHttpClientExceptions(HttpStatusCodeException ex){
+        HttpHeaders originalHeaders = ex.getResponseHeaders();
+        HttpHeaders newHeaders = new HttpHeaders();
+        if (originalHeaders != null) {
+            originalHeaders.forEach((key, value) -> {
+                if (!key.equalsIgnoreCase(HttpHeaders.TRANSFER_ENCODING) &&
+                        !key.equalsIgnoreCase(HttpHeaders.CONTENT_LENGTH)) {
+                    newHeaders.put(key, value);
+                }
+            });
+            if (originalHeaders.getContentType() != null) {
+                newHeaders.setContentType(originalHeaders.getContentType());
+            }
+        }
+
         return ResponseEntity
                 .status(ex.getStatusCode())
-                .headers(headers -> headers.addAll(ex.getResponseHeaders()))
+                .headers(newHeaders)
                 .body(ex.getResponseBodyAsByteArray());
     }
 }

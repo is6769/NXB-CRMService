@@ -38,25 +38,25 @@ public class BRTServiceClient {
                         .path("/subscribers/{subscriberId}/tariff/{tariffId}")
                         .build(subscriberId, tariffId))
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, ((request, response) -> {
-                    log.info(response.getHeaders().toString());
-                    throw new HttpClientErrorException(
-                            response.getStatusCode(),
-                            response.getStatusText(),
-                            response.getHeaders(),
-                            response.getBody().readAllBytes(),
-                            null
-                    );
-                }))
-                .onStatus(HttpStatusCode::is5xxServerError, ((request, response) -> {
-                    throw new HttpServerErrorException(
-                            response.getStatusCode(),
-                            response.getStatusText(),
-                            response.getHeaders(),
-                            response.getBody().readAllBytes(),
-                            null
-                    );
-                }))
+//                .onStatus(HttpStatusCode::is4xxClientError, ((request, response) -> {
+//                    log.info(response.getHeaders().toString());
+//                    throw new HttpClientErrorException(
+//                            response.getStatusCode(),
+//                            response.getStatusText(),
+//                            response.getHeaders(),
+//                            response.getBody().readAllBytes(),
+//                            null
+//                    );
+//                }))
+//                .onStatus(HttpStatusCode::is5xxServerError, ((request, response) -> {
+//                    throw new HttpServerErrorException(
+//                            response.getStatusCode(),
+//                            response.getStatusText(),
+//                            response.getHeaders(),
+//                            response.getBody().readAllBytes(),
+//                            null
+//                    );
+//                }))
                 .body(String.class);
     }
 
