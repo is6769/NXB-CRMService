@@ -4,15 +4,22 @@ import org.example.crmservice.dtos.SubscriberDTO;
 import org.example.crmservice.dtos.TopUpDTO;
 import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.FullSubscriberAndTariffInfoDTO;
 import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.SubscriberWithIdDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
+
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class BRTServiceClient {
 
+    private static final Logger log = LoggerFactory.getLogger(BRTServiceClient.class);
     private final RestClient.Builder restClientBuilder;
 
     @Value("${const.brt-service.BASE_URL}")
@@ -24,18 +31,33 @@ public class BRTServiceClient {
 
 
     public String setTariffForSubscriber(Long subscriberId, Long tariffId){
-        try {
-            return restClientBuilder
-                    .build()
-                    .put()
-                    .uri(BASE_URL, uriBuilder -> uriBuilder
-                            .path("/subscribers/{subscriberId}/tariff/{tariffId}")
-                            .build(subscriberId, tariffId))
-                    .retrieve()
-                    .body(String.class);
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            throw e;
-        }
+        return restClientBuilder
+                .build()
+                .put()
+                .uri(BASE_URL, uriBuilder -> uriBuilder
+                        .path("/subscribers/{subscriberId}/tariff/{tariffId}")
+                        .build(subscriberId, tariffId))
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, ((request, response) -> {
+                    log.info(response.getHeaders().toString());
+                    throw new HttpClientErrorException(
+                            response.getStatusCode(),
+                            response.getStatusText(),
+                            response.getHeaders(),
+                            response.getBody().readAllBytes(),
+                            null
+                    );
+                }))
+                .onStatus(HttpStatusCode::is5xxServerError, ((request, response) -> {
+                    throw new HttpServerErrorException(
+                            response.getStatusCode(),
+                            response.getStatusText(),
+                            response.getHeaders(),
+                            response.getBody().readAllBytes(),
+                            null
+                    );
+                }))
+                .body(String.class);
     }
 
     public FullSubscriberAndTariffInfoDTO getSubscriberAndTariffInfo(Long subscriberId) {
