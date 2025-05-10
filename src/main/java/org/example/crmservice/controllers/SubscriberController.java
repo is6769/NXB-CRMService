@@ -1,5 +1,6 @@
 package org.example.crmservice.controllers;
 
+import jakarta.validation.Valid;
 import org.example.crmservice.dtos.SubscriberDTO;
 import org.example.crmservice.dtos.TopUpDTO;
 import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.FullSubscriberAndTariffInfoDTO;
@@ -19,7 +20,7 @@ public class SubscriberController {
     }
 
     @PatchMapping("subscriber/balance")
-    public String topUpBalance(@RequestBody TopUpDTO topUpDTO, @AuthenticationPrincipal String ref_id){
+    public String topUpBalance(@RequestBody @Valid TopUpDTO topUpDTO, @AuthenticationPrincipal String ref_id){
         return subscribersService.topUpBalance(Long.valueOf(ref_id),topUpDTO);
     }
 

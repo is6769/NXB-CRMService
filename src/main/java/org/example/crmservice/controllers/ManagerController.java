@@ -1,5 +1,6 @@
 package org.example.crmservice.controllers;
 
+import jakarta.validation.Valid;
 import org.example.crmservice.dtos.SubscriberDTO;
 import org.example.crmservice.dtos.TopUpDTO;
 import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.FullSubscriberAndTariffInfoDTO;
@@ -18,7 +19,7 @@ public class ManagerController {
     }
 
     @PostMapping("/subscriber")
-    public SubscriberWithIdDTO createSubscriber(@RequestBody SubscriberDTO subscriberDTO){
+    public SubscriberWithIdDTO createSubscriber(@Valid @RequestBody SubscriberDTO subscriberDTO){
         return subscribersService.createSubscriber(subscriberDTO);
     }
 
@@ -28,7 +29,7 @@ public class ManagerController {
     }
 
     @PatchMapping("subscribers/{subscriberId}/balance")
-    public String topUpBalance(@PathVariable Long subscriberId, @RequestBody TopUpDTO topUpDTO){
+    public String topUpBalance(@PathVariable Long subscriberId,@Valid @RequestBody TopUpDTO topUpDTO){
         return subscribersService.topUpBalance(subscriberId,topUpDTO);
     }
 
