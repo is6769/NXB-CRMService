@@ -1,7 +1,5 @@
 package org.example.crmservice.dtos.fullSubscriberAndTariffInfo;
 
-import org.springframework.lang.Nullable;
-
 import java.math.BigDecimal;
 
 public record SubscriberWithIdDTO(
