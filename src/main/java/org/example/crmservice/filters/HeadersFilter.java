@@ -26,21 +26,17 @@ public class HeadersFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("HEADERS FILTER TRIGGERED");
         String userId = request.getHeader("X-User-Id");
-        if (Objects.nonNull(userId)){
+        if (Objects.nonNull(userId) && Objects.nonNull(request.getHeader("X-User-Role"))){
             GrantedAuthority role = new SimpleGrantedAuthority(request.getHeader("X-User-Role"));
 
-            //if (userId.equals("MANAGER"))
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     userId,
                     null,
                     List.of(role)
             );
-            log.info(authentication.toString());
             SecurityContext securityContext = new SecurityContextImpl(authentication);
             SecurityContextHolder.setContext(securityContext);
-            //}
         }
         filterChain.doFilter(request, response);
     }
