@@ -1,5 +1,6 @@
 package org.example.crmservice.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.crmservice.dtos.SubscriberDTO;
 import org.example.crmservice.dtos.TopUpDTO;
 import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.FullSubscriberAndTariffInfoDTO;
@@ -8,8 +9,12 @@ import org.example.crmservice.dtos.fullSubscriberAndTariffInfo.TariffDTO;
 import org.example.crmservice.exceptions.handlers.RestExceptionsHandler;
 import org.example.crmservice.services.SubscribersService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +25,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,90 +45,143 @@ class ManagerControllerTest {
     private ManagerController managerController;
 
     private MockMvc mockMvc;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(managerController)
                 .setControllerAdvice(new RestExceptionsHandler())
                 .build();
+        objectMapper = new ObjectMapper();
     }
 
-    @Test
-    void createSubscriber_withValidData_returnsCreatedSubscriber() throws Exception {
-        SubscriberDTO subscriberDTO = new SubscriberDTO("79001234567", "Test", "Middle", "User", 1L, new BigDecimal("100.00"));
-        SubscriberWithIdDTO response = new SubscriberWithIdDTO(1L, "79001234567", "Test", "Middle", "User", 1L, new BigDecimal("100.00"));
+    @Nested
+    @DisplayName("Subscriber Creation Tests")
+    class SubscriberCreationTests {
         
-        when(subscribersService.createSubscriber(any(SubscriberDTO.class))).thenReturn(response);
+        @Test
+        @DisplayName("createSubscriber with valid data returns created subscriber")
+        void createSubscriber_withValidData_returnsCreatedSubscriber() throws Exception {
+            SubscriberDTO subscriberDTO = new SubscriberDTO("79001234567", "Test", "Middle", "User", 1L, new BigDecimal("100.00"));
+            SubscriberWithIdDTO response = new SubscriberWithIdDTO(1L, "79001234567", "Test", "Middle", "User", 1L, new BigDecimal("100.00"));
+            
+            when(subscribersService.createSubscriber(any(SubscriberDTO.class))).thenReturn(response);
+            
+            mockMvc.perform(post("/manager/subscriber")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(subscriberDTO)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(1))
+                    .andExpect(jsonPath("$.msisdn").value("79001234567"))
+                    .andExpect(jsonPath("$.firstName").value("Test"))
+                    .andExpect(jsonPath("$.secondName").value("Middle"))
+                    .andExpect(jsonPath("$.surname").value("User"))
+                    .andExpect(jsonPath("$.tariffId").value(1))
+                    .andExpect(jsonPath("$.balance").value(100.00));
+            
+            verify(subscribersService).createSubscriber(any(SubscriberDTO.class));
+        }
         
-        mockMvc.perform(post("/manager/subscriber")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"msisdn\":\"79001234567\",\"firstName\":\"Test\",\"secondName\":\"Middle\",\"surname\":\"User\",\"tariffId\":1,\"balance\":100.00}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.msisdn").value("79001234567"))
-                .andExpect(jsonPath("$.firstName").value("Test"))
-                .andExpect(jsonPath("$.secondName").value("Middle"))
-                .andExpect(jsonPath("$.surname").value("User"))
-                .andExpect(jsonPath("$.tariffId").value(1))
-                .andExpect(jsonPath("$.balance").value(100.00));
+        @Test
+        @DisplayName("createSubscriber with null optional fields is valid")
+        void createSubscriber_withNullOptionalFields_isValid() throws Exception {
+            SubscriberDTO subscriberDTO = new SubscriberDTO("79001234567", "Test", null, "User", null, null);
+            SubscriberWithIdDTO response = new SubscriberWithIdDTO(1L, "79001234567", "Test", null, "User", null, null);
+            
+            when(subscribersService.createSubscriber(any(SubscriberDTO.class))).thenReturn(response);
+            
+            mockMvc.perform(post("/manager/subscriber")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(subscriberDTO)))
+                    .andExpect(status().isOk());
+            
+            verify(subscribersService).createSubscriber(any(SubscriberDTO.class));
+        }
         
-        verify(subscribersService).createSubscriber(any(SubscriberDTO.class));
-    }
+        @ParameterizedTest
+        @DisplayName("createSubscriber with invalid MSISDN pattern returns BadRequest")
+        @ValueSource(strings = {"msisdn", "123-456-789", "abcdefg", "", " "})
+        void createSubscriber_withInvalidMsisdn_returnsBadRequest(String invalidMsisdn) throws Exception {
+            Map<String, Object> subscriberMap = new HashMap<>();
+            subscriberMap.put("msisdn", invalidMsisdn);
+            subscriberMap.put("firstName", "Test");
+            subscriberMap.put("surname", "User");
+            
+            mockMvc.perform(post("/manager/subscriber")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(subscriberMap)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(result -> {
+                        Exception exception = result.getResolvedException();
+                        assert exception instanceof MethodArgumentNotValidException;
+                    });
+            
+            verifyNoInteractions(subscribersService);
+        }
+        
+        @Test
+        @DisplayName("createSubscriber with missing required firstName returns BadRequest")
+        void createSubscriber_withMissingFirstName_returnsBadRequest() throws Exception {
+            Map<String, Object> subscriberMap = new HashMap<>();
+            subscriberMap.put("msisdn", "79001234567");
+            subscriberMap.put("surname", "User");
+            
+            mockMvc.perform(post("/manager/subscriber")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(subscriberMap)))
+                    .andExpect(status().isBadRequest());
+            
+            verifyNoInteractions(subscribersService);
+        }
+        
+        @Test
+        @DisplayName("createSubscriber with missing required surname returns BadRequest")
+        void createSubscriber_withMissingSurname_returnsBadRequest() throws Exception {
+            Map<String, Object> subscriberMap = new HashMap<>();
+            subscriberMap.put("msisdn", "79001234567");
+            subscriberMap.put("firstName", "Test");
+            
+            mockMvc.perform(post("/manager/subscriber")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(subscriberMap)))
+                    .andExpect(status().isBadRequest());
+            
+            verifyNoInteractions(subscribersService);
+        }
 
-    @Test
-    void createSubscriber_withInvalidMsisdn_returnsBadRequest() throws Exception {
-        mockMvc.perform(post("/manager/subscriber")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"msisdn\":\"invalid-msisdn\",\"firstName\":\"Test\",\"secondName\":\"Middle\",\"surname\":\"User\",\"tariffId\":1,\"balance\":100.00}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> {
-                    Exception exception = result.getResolvedException();
-                    assert exception instanceof MethodArgumentNotValidException;
-                });
-        
-        verifyNoInteractions(subscribersService);
-    }
+        @Test
+        @DisplayName("createSubscriber with negative tariffId returns BadRequest")
+        void createSubscriber_withNegativeTariffId_returnsBadRequest() throws Exception {
+            Map<String, Object> subscriberMap = new HashMap<>();
+            subscriberMap.put("msisdn", "79001234567");
+            subscriberMap.put("firstName", "Test");
+            subscriberMap.put("surname", "User");
+            subscriberMap.put("tariffId", -1);
+            
+            mockMvc.perform(post("/manager/subscriber")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(subscriberMap)))
+                    .andExpect(status().isBadRequest());
+            
+            verifyNoInteractions(subscribersService);
+        }
 
-    @Test
-    void createSubscriber_withMissingRequiredFields_returnsBadRequest() throws Exception {
-        mockMvc.perform(post("/manager/subscriber")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"msisdn\":\"79001234567\",\"secondName\":\"Middle\",\"tariffId\":1,\"balance\":100.00}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> {
-                    Exception exception = result.getResolvedException();
-                    assert exception instanceof MethodArgumentNotValidException;
-                });
-        
-        verifyNoInteractions(subscribersService);
-    }
-
-    @Test
-    void createSubscriber_withNegativeTariffId_returnsBadRequest() throws Exception {
-        mockMvc.perform(post("/manager/subscriber")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"msisdn\":\"79001234567\",\"firstName\":\"Test\",\"secondName\":\"Middle\",\"surname\":\"User\",\"tariffId\":-1,\"balance\":100.00}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> {
-                    Exception exception = result.getResolvedException();
-                    assert exception instanceof MethodArgumentNotValidException;
-                });
-        
-        verifyNoInteractions(subscribersService);
-    }
-
-    @Test
-    void createSubscriber_withNegativeBalance_returnsBadRequest() throws Exception {
-        mockMvc.perform(post("/manager/subscriber")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"msisdn\":\"79001234567\",\"firstName\":\"Test\",\"secondName\":\"Middle\",\"surname\":\"User\",\"tariffId\":1,\"balance\":-100.00}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> {
-                    Exception exception = result.getResolvedException();
-                    assert exception instanceof MethodArgumentNotValidException;
-                });
-        
-        verifyNoInteractions(subscribersService);
+        @Test
+        @DisplayName("createSubscriber with negative balance returns BadRequest")
+        void createSubscriber_withNegativeBalance_returnsBadRequest() throws Exception {
+            Map<String, Object> subscriberMap = new HashMap<>();
+            subscriberMap.put("msisdn", "79001234567");
+            subscriberMap.put("firstName", "Test");
+            subscriberMap.put("surname", "User");
+            subscriberMap.put("balance", -100.00);
+            
+            mockMvc.perform(post("/manager/subscriber")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(subscriberMap)))
+                    .andExpect(status().isBadRequest());
+            
+            verifyNoInteractions(subscribersService);
+        }
     }
 
     @Test
@@ -149,7 +209,7 @@ class ManagerControllerTest {
         
         mockMvc.perform(patch("/manager/subscribers/1/balance")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"amount\":100.00,\"unit\":\"y.e.\"}"))
+                .content(objectMapper.writeValueAsString(topUpDTO)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(response));
         
@@ -158,70 +218,61 @@ class ManagerControllerTest {
 
     @Test
     void topUpBalance_withNegativeAmount_returnsBadRequest() throws Exception {
+        TopUpDTO topUpDTO = new TopUpDTO(new BigDecimal("-100.00"), "y.e.");
+        
         mockMvc.perform(patch("/manager/subscribers/1/balance")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"amount\":-100.00,\"unit\":\"y.e.\"}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> {
-                    Exception exception = result.getResolvedException();
-                    assert exception instanceof MethodArgumentNotValidException;
-                });
+                .content(objectMapper.writeValueAsString(topUpDTO)))
+                .andExpect(status().isBadRequest());
         
         verifyNoInteractions(subscribersService);
     }
 
     @Test
     void topUpBalance_withZeroAmount_returnsBadRequest() throws Exception {
+        TopUpDTO topUpDTO = new TopUpDTO(new BigDecimal("0.00"), "y.e.");
+        
         mockMvc.perform(patch("/manager/subscribers/1/balance")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"amount\":0.00,\"unit\":\"y.e.\"}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> {
-                    Exception exception = result.getResolvedException();
-                    assert exception instanceof MethodArgumentNotValidException;
-                });
+                .content(objectMapper.writeValueAsString(topUpDTO)))
+                .andExpect(status().isBadRequest());
         
         verifyNoInteractions(subscribersService);
     }
 
     @Test
     void topUpBalance_withTooSmallAmount_returnsBadRequest() throws Exception {
+        TopUpDTO topUpDTO = new TopUpDTO(new BigDecimal("0.05"), "y.e.");
+        
         mockMvc.perform(patch("/manager/subscribers/1/balance")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"amount\":0.05,\"unit\":\"y.e.\"}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> {
-                    Exception exception = result.getResolvedException();
-                    assert exception instanceof MethodArgumentNotValidException;
-                });
+                .content(objectMapper.writeValueAsString(topUpDTO)))
+                .andExpect(status().isBadRequest());
         
         verifyNoInteractions(subscribersService);
     }
 
     @Test
     void topUpBalance_withMissingUnit_returnsBadRequest() throws Exception {
+        Map<String, Object> topUpMap = new HashMap<>();
+        topUpMap.put("amount", 100.00);
+        
         mockMvc.perform(patch("/manager/subscribers/1/balance")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"amount\":100.00}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> {
-                    Exception exception = result.getResolvedException();
-                    assert exception instanceof MethodArgumentNotValidException;
-                });
+                .content(objectMapper.writeValueAsString(topUpMap)))
+                .andExpect(status().isBadRequest());
         
         verifyNoInteractions(subscribersService);
     }
 
     @Test
     void topUpBalance_withEmptyUnit_returnsBadRequest() throws Exception {
+        TopUpDTO topUpDTO = new TopUpDTO(new BigDecimal("100.00"), "");
+        
         mockMvc.perform(patch("/manager/subscribers/1/balance")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"amount\":100.00,\"unit\":\"\"}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> {
-                    Exception exception = result.getResolvedException();
-                    assert exception instanceof MethodArgumentNotValidException;
-                });
+                .content(objectMapper.writeValueAsString(topUpDTO)))
+                .andExpect(status().isBadRequest());
         
         verifyNoInteractions(subscribersService);
     }

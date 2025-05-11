@@ -6,8 +6,7 @@ import java.math.BigDecimal;
 
 public record TopUpDTO(
         @NotNull
-        @PositiveOrZero(message = "If provided, must be positive or zero")
-        @DecimalMin(value = "0.1", inclusive = true)
+        @DecimalMin(value = "0.1", inclusive = true, message = "Must be provided. Must be >=0.1")
         BigDecimal amount,
 
         @NotBlank
