@@ -31,6 +31,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Тестовый класс для {@link SubscriberController}.
+ * Проверяет эндпоинты, доступные для абонентов.
+ */
 @ExtendWith(MockitoExtension.class)
 class SubscriberControllerTest {
 
@@ -56,6 +60,11 @@ class SubscriberControllerTest {
                 .build();
     }
 
+    /**
+     * Тестирует эндпоинт пополнения баланса абонентом с валидными данными.
+     * Ожидается успешный ответ (статус 200 OK) и сообщение об успешном обновлении баланса.
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void topUpBalance_withValidInput_returnsSuccessMessage() throws Exception {
         Long subscriberId = 42L;
@@ -73,6 +82,11 @@ class SubscriberControllerTest {
         verify(subscribersService).topUpBalance(eq(subscriberId), any(TopUpDTO.class));
     }
     
+    /**
+     * Тестирует эндпоинт пополнения баланса абонентом с отсутствующей суммой.
+     * Ожидается ошибка BadRequest (статус 400).
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void topUpBalance_withMissingAmount_returnsBadRequest() throws Exception {
         mockMvc.perform(patch("/subscriber/balance")
@@ -83,6 +97,11 @@ class SubscriberControllerTest {
         verifyNoInteractions(subscribersService);
     }
     
+    /**
+     * Тестирует эндпоинт пополнения баланса абонентом с отрицательной суммой.
+     * Ожидается ошибка BadRequest (статус 400).
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void topUpBalance_withNegativeAmount_returnsBadRequest() throws Exception {
         mockMvc.perform(patch("/subscriber/balance")
@@ -93,6 +112,11 @@ class SubscriberControllerTest {
         verifyNoInteractions(subscribersService);
     }
     
+    /**
+     * Тестирует эндпоинт пополнения баланса абонентом с нулевой суммой.
+     * Ожидается ошибка BadRequest (статус 400).
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void topUpBalance_withZeroAmount_returnsBadRequest() throws Exception {
         mockMvc.perform(patch("/subscriber/balance")
@@ -103,6 +127,11 @@ class SubscriberControllerTest {
         verifyNoInteractions(subscribersService);
     }
 
+    /**
+     * Тестирует эндпоинт пополнения баланса абонентом со слишком маленькой суммой.
+     * Ожидается ошибка BadRequest (статус 400).
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void topUpBalance_withTooSmallAmount_returnsBadRequest() throws Exception {
         mockMvc.perform(patch("/subscriber/balance")
@@ -113,6 +142,11 @@ class SubscriberControllerTest {
         verifyNoInteractions(subscribersService);
     }
     
+    /**
+     * Тестирует эндпоинт пополнения баланса абонентом с отсутствующей единицей измерения.
+     * Ожидается ошибка BadRequest (статус 400).
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void topUpBalance_withMissingUnit_returnsBadRequest() throws Exception {
         mockMvc.perform(patch("/subscriber/balance")
@@ -123,6 +157,11 @@ class SubscriberControllerTest {
         verifyNoInteractions(subscribersService);
     }
     
+    /**
+     * Тестирует эндпоинт пополнения баланса абонентом с пустой единицей измерения.
+     * Ожидается ошибка BadRequest (статус 400).
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void topUpBalance_withEmptyUnit_returnsBadRequest() throws Exception {
         mockMvc.perform(patch("/subscriber/balance")
@@ -133,6 +172,10 @@ class SubscriberControllerTest {
         verifyNoInteractions(subscribersService);
     }
 
+    /**
+     * Вспомогательный класс для разрешения аргументов, аннотированных {@link AuthenticationPrincipal}.
+     * Используется для имитации поведения Spring Security в тестах.
+     */
     private static class AuthenticationPrincipalResolver implements HandlerMethodArgumentResolver {
         @Override
         public boolean supportsParameter(MethodParameter parameter) {

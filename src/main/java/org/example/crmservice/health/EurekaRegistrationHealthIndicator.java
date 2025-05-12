@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * Индикатор состояния, проверяющий регистрацию сервиса в Eureka.
+ */
 @Component
 public class EurekaRegistrationHealthIndicator implements HealthIndicator {
 
@@ -18,10 +21,19 @@ public class EurekaRegistrationHealthIndicator implements HealthIndicator {
     private final EurekaDiscoveryClient eurekaDiscoveryClient;
 
 
+    /**
+     * Конструктор для {@link EurekaRegistrationHealthIndicator}.
+     * @param eurekaDiscoveryClient Клиент Eureka для получения информации об экземплярах сервиса.
+     */
     public EurekaRegistrationHealthIndicator(EurekaDiscoveryClient eurekaDiscoveryClient) {
         this.eurekaDiscoveryClient = eurekaDiscoveryClient;
     }
 
+    /**
+     * Проверяет состояние регистрации сервиса в Eureka.
+     * @return {@link Health#up()} если сервис зарегистрирован, иначе {@link Health#down()}.
+     *         В случае ошибки возвращает {@link Health#down()} с деталями исключения.
+     */
     @Override
     public Health health() {
         try {

@@ -18,6 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Тестовый класс для {@link SubscribersService}.
+ * Проверяет корректность делегирования вызовов клиенту BRT-сервиса.
+ */
 @ExtendWith(MockitoExtension.class)
 class SubscribersServiceTest {
 
@@ -27,6 +31,10 @@ class SubscribersServiceTest {
     @InjectMocks
     private SubscribersService subscribersService;
 
+    /**
+     * Тестирует метод {@link SubscribersService#setTariffForSubscriber(Long, Long)}.
+     * Проверяет, что вызов корректно делегируется {@link BRTServiceClient}.
+     */
     @Test
     void setTariffForSubscriber_delegatesToClient() {
         Long subscriberId = 1L;
@@ -42,6 +50,10 @@ class SubscribersServiceTest {
         verify(brtServiceClient).setTariffForSubscriber(subscriberId, tariffId);
     }
 
+    /**
+     * Тестирует метод {@link SubscribersService#getSubscriberInfo(Long)}.
+     * Проверяет, что вызов корректно делегируется {@link BRTServiceClient}.
+     */
     @Test
     void getSubscriberInfo_delegatesToClient() {
         Long subscriberId = 1L;
@@ -56,6 +68,10 @@ class SubscribersServiceTest {
         verify(brtServiceClient).getSubscriberAndTariffInfo(subscriberId);
     }
 
+    /**
+     * Тестирует метод {@link SubscribersService#createSubscriber(SubscriberDTO)}.
+     * Проверяет, что вызов корректно делегируется {@link BRTServiceClient}.
+     */
     @Test
     void createSubscriber_delegatesToClient() {
         SubscriberDTO subscriberDTO = new SubscriberDTO("79001002030", "Test", "Middle", "User", 1L, new BigDecimal("100.00"));
@@ -70,6 +86,10 @@ class SubscribersServiceTest {
         verify(brtServiceClient).createSubscriber(subscriberDTO);
     }
 
+    /**
+     * Тестирует метод {@link SubscribersService#topUpBalance(Long, TopUpDTO)}.
+     * Проверяет, что вызов корректно делегируется {@link BRTServiceClient}.
+     */
     @Test
     void topUpBalance_delegatesToClient() {
         Long subscriberId = 1L;

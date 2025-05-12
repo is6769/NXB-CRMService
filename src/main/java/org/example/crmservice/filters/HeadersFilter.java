@@ -20,10 +20,26 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Фильтр для обработки заголовков запроса, содержащих информацию о пользователе и его роли.
+ * Создает и устанавливает объект {@link Authentication} в {@link SecurityContextHolder}
+ * на основе этих заголовков.
+ */
 @Component
 public class HeadersFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(HeadersFilter.class);
 
+    /**
+     * Обрабатывает входящий HTTP-запрос для извлечения информации о пользователе из заголовков.
+     * Если заголовки `X-User-Id` и `X-User-Role` присутствуют, создает объект аутентификации
+     * и помещает его в контекст безопасности.
+     *
+     * @param request HTTP-запрос.
+     * @param response HTTP-ответ.
+     * @param filterChain Цепочка фильтров.
+     * @throws ServletException Если возникает ошибка сервлета.
+     * @throws IOException Если возникает ошибка ввода-вывода.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String userId = request.getHeader("X-User-Id");

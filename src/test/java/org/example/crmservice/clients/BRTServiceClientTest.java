@@ -26,6 +26,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Тестовый класс для {@link BRTServiceClient}.
+ * Проверяет, что клиент корректно формирует и отправляет запросы к BRT-сервису.
+ */
 @ExtendWith(MockitoExtension.class)
 class BRTServiceClientTest {
 
@@ -42,6 +46,10 @@ class BRTServiceClientTest {
         ReflectionTestUtils.setField(brtServiceClient, "BASE_URL", baseUrl);
     }
 
+    /**
+     * Тестирует метод {@link BRTServiceClient#setTariffForSubscriber(Long, Long)}.
+     * Проверяет, что формируется корректный PUT-запрос с правильным URI.
+     */
     @Test
     void setTariffForSubscriber_shouldMakeProperRequest() {
         RestClient restClient = mock(RestClient.class);
@@ -71,6 +79,10 @@ class BRTServiceClientTest {
         assertEquals(baseUrl + "/subscribers/1/tariff/2", actualUri.toString());
     }
 
+    /**
+     * Тестирует метод {@link BRTServiceClient#getSubscriberAndTariffInfo(Long)}.
+     * Проверяет, что формируется корректный GET-запрос с правильным URI.
+     */
     @Test
     void getSubscriberAndTariffInfo_shouldMakeProperRequest() {
         RestClient restClient = mock(RestClient.class);
@@ -101,6 +113,10 @@ class BRTServiceClientTest {
         assertEquals(baseUrl + "/subscribers/1", actualUri.toString());
     }
 
+    /**
+     * Тестирует метод {@link BRTServiceClient#createSubscriber(SubscriberDTO)}.
+     * Проверяет, что формируется корректный POST-запрос с правильным URI и телом запроса.
+     */
     @Test
     void createSubscriber_shouldMakeProperRequest() {
         RestClient restClient = mock(RestClient.class);
@@ -135,6 +151,10 @@ class BRTServiceClientTest {
         verify(requestBodySpec).body(subscriberDTO);
     }
 
+    /**
+     * Тестирует метод {@link BRTServiceClient#topUpBalance(Long, TopUpDTO)}.
+     * Проверяет, что формируется корректный PATCH-запрос с правильным URI и телом запроса.
+     */
     @Test
     void topUpBalance_shouldMakeProperRequest() {
         RestClient restClient = mock(RestClient.class);

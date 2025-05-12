@@ -9,9 +9,29 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+/**
+ * Конфигурация безопасности для CRM-сервиса.
+ * Определяет правила доступа к эндпоинтам и настраивает цепочку фильтров безопасности.
+ */
 @Configuration
 public class SecurityConfig {
 
+    /**
+     * Настраивает цепочку фильтров безопасности Spring Security.
+     * - Отключает CSRF и CORS.
+     * - Добавляет {@link HeadersFilter} перед {@link BasicAuthenticationFilter} для обработки заголовков аутентификации.
+     * - Отключает стандартные механизмы входа (formLogin, httpBasic).
+     * - Определяет правила авторизации для эндпоинтов:
+     *   - `/manager/**` требует роль "MANAGER".
+     *   - `/subscriber/**` требует роль "SUBSCRIBER".
+     *   - Все остальные запросы разрешены.
+     * - Устанавливает политику управления сессиями как STATELESS.
+     *
+     * @param http Конфигуратор {@link HttpSecurity}.
+     * @param headersFilter Фильтр для обработки заголовков аутентификации.
+     * @return Сконфигурированный {@link SecurityFilterChain}.
+     * @throws Exception Если возникает ошибка при конфигурации.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, HeadersFilter headersFilter) throws Exception {
         http.cors(AbstractHttpConfigurer::disable);

@@ -31,12 +31,21 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Тестовый класс для {@link SecurityConfig}.
+ * Проверяет доступность эндпоинтов для различных ролей пользователей.
+ */
 @ExtendWith(MockitoExtension.class)
 class SecurityConfigTest {
 
     @Mock
     private SubscribersService subscribersService;
 
+    /**
+     * Тестирует доступность эндпоинтов менеджера для пользователя с ролью "MANAGER".
+     * Ожидается, что все эндпоинты менеджера будут доступны (статус 200 OK).
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void managerEndpoints_accessibleByManager() throws Exception {
         ManagerController managerController = new ManagerController(subscribersService);
@@ -64,6 +73,11 @@ class SecurityConfigTest {
                 .andExpect(status().isOk());
     }
     
+    /**
+     * Тестирует доступность эндпоинтов абонента для пользователя с ролью "SUBSCRIBER".
+     * Ожидается, что эндпоинт пополнения баланса будет доступен (статус 200 OK).
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void subscriberEndpoints_accessibleBySubscriber() throws Exception {
         SubscriberController subscriberController = new SubscriberController(subscribersService);
@@ -84,6 +98,10 @@ class SecurityConfigTest {
                 .andExpect(status().isOk());
     }
 
+    /**
+     * Вспомогательный класс для разрешения аргументов, аннотированных {@link AuthenticationPrincipal}.
+     * Используется для имитации поведения Spring Security в тестах.
+     */
     private static class AuthenticationPrincipalResolver implements HandlerMethodArgumentResolver {
         @Override
         public boolean supportsParameter(MethodParameter parameter) {

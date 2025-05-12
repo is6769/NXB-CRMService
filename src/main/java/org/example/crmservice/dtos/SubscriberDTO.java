@@ -8,6 +8,17 @@ import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
 
+/**
+ * DTO (Data Transfer Object) для создания нового абонента.
+ * Содержит основную информацию об абоненте, необходимую для его регистрации.
+ *
+ * @param msisdn Номер телефона абонента (MSISDN). Обязательное поле, должно содержать только цифры.
+ * @param firstName Имя абонента. Обязательное поле.
+ * @param secondName Отчество абонента. Необязательное поле.
+ * @param surname Фамилия абонента. Обязательное поле.
+ * @param tariffId Идентификатор тарифного плана. Необязательное поле; если указано, должно быть положительным.
+ * @param balance Начальный баланс абонента. Необязательное поле; если указано, должно быть положительным или нулевым.
+ */
 public record SubscriberDTO(
         @NotBlank
         @Pattern(regexp = "^\\d*\\.?\\d+$", message = "Must be a positive number")

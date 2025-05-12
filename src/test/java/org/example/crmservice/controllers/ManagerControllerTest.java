@@ -35,6 +35,10 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Тестовый класс для {@link ManagerController}.
+ * Проверяет эндпоинты, доступные для менеджеров.
+ */
 @ExtendWith(MockitoExtension.class)
 class ManagerControllerTest {
 
@@ -47,6 +51,10 @@ class ManagerControllerTest {
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 
+    /**
+     * Настройка тестового окружения перед каждым тестом.
+     * Инициализирует {@link MockMvc} и {@link ObjectMapper}.
+     */
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(managerController)
@@ -55,10 +63,18 @@ class ManagerControllerTest {
         objectMapper = new ObjectMapper();
     }
 
+    /**
+     * Вложенный класс для тестов, связанных с созданием абонента.
+     */
     @Nested
     @DisplayName("Subscriber Creation Tests")
     class SubscriberCreationTests {
         
+        /**
+         * Тестирует создание абонента с валидными данными.
+         * Ожидается успешный ответ (статус 200 OK) и возврат данных созданного абонента.
+         * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+         */
         @Test
         @DisplayName("createSubscriber with valid data returns created subscriber")
         void createSubscriber_withValidData_returnsCreatedSubscriber() throws Exception {
@@ -82,6 +98,11 @@ class ManagerControllerTest {
             verify(subscribersService).createSubscriber(any(SubscriberDTO.class));
         }
         
+        /**
+         * Тестирует создание абонента с null значениями для необязательных полей.
+         * Ожидается успешный ответ (статус 200 OK).
+         * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+         */
         @Test
         @DisplayName("createSubscriber with null optional fields is valid")
         void createSubscriber_withNullOptionalFields_isValid() throws Exception {
@@ -98,6 +119,12 @@ class ManagerControllerTest {
             verify(subscribersService).createSubscriber(any(SubscriberDTO.class));
         }
         
+        /**
+         * Параметризованный тест для создания абонента с невалидным MSISDN.
+         * Ожидается ошибка BadRequest (статус 400).
+         * @param invalidMsisdn Невалидный MSISDN.
+         * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+         */
         @ParameterizedTest
         @DisplayName("createSubscriber with invalid MSISDN pattern returns BadRequest")
         @ValueSource(strings = {"msisdn", "123-456-789", "abcdefg", "", " "})
@@ -119,6 +146,11 @@ class ManagerControllerTest {
             verifyNoInteractions(subscribersService);
         }
         
+        /**
+         * Тестирует создание абонента с отсутствующим обязательным полем firstName.
+         * Ожидается ошибка BadRequest (статус 400).
+         * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+         */
         @Test
         @DisplayName("createSubscriber with missing required firstName returns BadRequest")
         void createSubscriber_withMissingFirstName_returnsBadRequest() throws Exception {
@@ -134,6 +166,11 @@ class ManagerControllerTest {
             verifyNoInteractions(subscribersService);
         }
         
+        /**
+         * Тестирует создание абонента с отсутствующим обязательным полем surname.
+         * Ожидается ошибка BadRequest (статус 400).
+         * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+         */
         @Test
         @DisplayName("createSubscriber with missing required surname returns BadRequest")
         void createSubscriber_withMissingSurname_returnsBadRequest() throws Exception {
@@ -149,6 +186,11 @@ class ManagerControllerTest {
             verifyNoInteractions(subscribersService);
         }
 
+        /**
+         * Тестирует создание абонента с отрицательным tariffId.
+         * Ожидается ошибка BadRequest (статус 400).
+         * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+         */
         @Test
         @DisplayName("createSubscriber with negative tariffId returns BadRequest")
         void createSubscriber_withNegativeTariffId_returnsBadRequest() throws Exception {
@@ -166,6 +208,11 @@ class ManagerControllerTest {
             verifyNoInteractions(subscribersService);
         }
 
+        /**
+         * Тестирует создание абонента с отрицательным балансом.
+         * Ожидается ошибка BadRequest (статус 400).
+         * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+         */
         @Test
         @DisplayName("createSubscriber with negative balance returns BadRequest")
         void createSubscriber_withNegativeBalance_returnsBadRequest() throws Exception {
@@ -184,6 +231,11 @@ class ManagerControllerTest {
         }
     }
 
+    /**
+     * Тестирует установку тарифа для абонента с валидными данными.
+     * Ожидается успешный ответ (статус 200 OK) и сообщение об успехе.
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void setTariffForSubscriber_withValidData_returnsSuccessMessage() throws Exception {
         Long subscriberId = 1L;
@@ -199,6 +251,11 @@ class ManagerControllerTest {
         verify(subscribersService).setTariffForSubscriber(subscriberId, tariffId);
     }
 
+    /**
+     * Тестирует пополнение баланса абонента менеджером с валидными данными.
+     * Ожидается успешный ответ (статус 200 OK) и сообщение об успехе.
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void topUpBalance_withValidData_returnsSuccessMessage() throws Exception {
         Long subscriberId = 1L;
@@ -216,6 +273,11 @@ class ManagerControllerTest {
         verify(subscribersService).topUpBalance(eq(subscriberId), any(TopUpDTO.class));
     }
 
+    /**
+     * Тестирует пополнение баланса абонента менеджером с отрицательной суммой.
+     * Ожидается ошибка BadRequest (статус 400).
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void topUpBalance_withNegativeAmount_returnsBadRequest() throws Exception {
         TopUpDTO topUpDTO = new TopUpDTO(new BigDecimal("-100.00"), "y.e.");
@@ -228,6 +290,11 @@ class ManagerControllerTest {
         verifyNoInteractions(subscribersService);
     }
 
+    /**
+     * Тестирует пополнение баланса абонента менеджером с нулевой суммой.
+     * Ожидается ошибка BadRequest (статус 400).
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void topUpBalance_withZeroAmount_returnsBadRequest() throws Exception {
         TopUpDTO topUpDTO = new TopUpDTO(new BigDecimal("0.00"), "y.e.");
@@ -240,6 +307,11 @@ class ManagerControllerTest {
         verifyNoInteractions(subscribersService);
     }
 
+    /**
+     * Тестирует пополнение баланса абонента менеджером со слишком маленькой суммой.
+     * Ожидается ошибка BadRequest (статус 400).
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void topUpBalance_withTooSmallAmount_returnsBadRequest() throws Exception {
         TopUpDTO topUpDTO = new TopUpDTO(new BigDecimal("0.05"), "y.e.");
@@ -252,6 +324,11 @@ class ManagerControllerTest {
         verifyNoInteractions(subscribersService);
     }
 
+    /**
+     * Тестирует пополнение баланса абонента менеджером с отсутствующей единицей измерения.
+     * Ожидается ошибка BadRequest (статус 400).
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void topUpBalance_withMissingUnit_returnsBadRequest() throws Exception {
         Map<String, Object> topUpMap = new HashMap<>();
@@ -265,6 +342,11 @@ class ManagerControllerTest {
         verifyNoInteractions(subscribersService);
     }
 
+    /**
+     * Тестирует пополнение баланса абонента менеджером с пустой единицей измерения.
+     * Ожидается ошибка BadRequest (статус 400).
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void topUpBalance_withEmptyUnit_returnsBadRequest() throws Exception {
         TopUpDTO topUpDTO = new TopUpDTO(new BigDecimal("100.00"), "");
@@ -277,6 +359,11 @@ class ManagerControllerTest {
         verifyNoInteractions(subscribersService);
     }
 
+    /**
+     * Тестирует получение информации об абоненте и его тарифе с валидными данными.
+     * Ожидается успешный ответ (статус 200 OK) и возврат полной информации.
+     * @throws Exception если возникает ошибка при выполнении MockMvc запроса.
+     */
     @Test
     void getSubscriberAndTariffInfo_withValidData_returnsSubscriberWithTariff() throws Exception {
         Long subscriberId = 1L;
